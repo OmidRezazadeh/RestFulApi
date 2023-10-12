@@ -1,2 +1,4 @@
 node_modules
-Configs/config.env
+# ENV File
+.env
+/Configs/config.env.js
