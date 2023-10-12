@@ -1,20 +1,16 @@
 const express = require("express");
-const connectDB = require("./configs/database");
+const path = require("path");
+const connectDB = require("./Configs/database");
 const app = express();
+app.use(express.json());
 const dotEnv = require("dotenv");
 
 //* Load Config
 dotEnv.config({path: "./configs/config.env"});
 connectDB();
 
-app.get("/", (req, res) => {
-  res.status(200).json({ toplearn: "Hello World" });
-});
 
-app.get("/blog", (req, res) => {
-  res.status(200).json({ toplearn: "Hello blog m" });
-});
-
+app.use(require("./Routes/Api"));
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(
