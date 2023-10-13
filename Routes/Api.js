@@ -5,6 +5,7 @@ router.get("/", ProductController.home);
 router.post("/store", ProductController.store);
 router.get("/list", ProductController.list);
 router.get("/:id",ProductController.single);
+router.put("/:id", ProductController.edit);
 
 
 module.exports = router;

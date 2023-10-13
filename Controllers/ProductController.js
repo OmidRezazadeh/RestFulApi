@@ -40,9 +40,32 @@ exports.single = async (req, res) => {
         }
         const product = await Product.findById(productId);
         if (!product) return res.status(404).json({error: 'Product not found'});
+
         res.status(200).json(product);
+
     } catch (err) {
         console.error(err);
         res.status(500).json({error: 'Internal server error'});
     }
 };
+exports.edit= async (req,res)=>{
+    try {
+        const productId = req.params.id;
+        if (!ObjectId.isValid(productId)) {
+            return res.status(400).json({error: 'Invalid product ID'});
+        }
+        const product = await Product.findById(productId);
+        if (!product) return res.status(404).json({error: 'Product not found'});
+
+        const {name, price, quantity, image} = req.body;
+        product.name= name;
+        product.price= price;
+        product.quantity = quantity
+        product.image= image;
+        await product.save();
+        res.status(200).json(product);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: 'Internal server error'});
+    }
+}
