@@ -1,6 +1,12 @@
 const Product = require("../Models/Product");
 const {transformData} = require("../utils/ProductTransformData");
 const {ObjectId} = require('mongoose').Types;
+const multer = require("multer");
+const { fileFilter } = require("../utils/upload");
+const path = require("path");
+const appRoot = require("app-root-path");
+const sharp = require("sharp");
+const shortId = require("shortid");
 exports.home = (req, res) => {
     res.status(200).json({toplearn: "Hello blog m"});
 };
@@ -78,9 +84,46 @@ exports.delete = async (req, res) => {
         const product = await Product.findById(productId);
         if (!product) return res.status(404).json({error: 'Product not found'});
         await Product.findByIdAndDelete(productId);
-        res.status(200).json({"message":"product has been successfully removed"})
+        res.status(200).json({"message": "product has been successfully removed"})
     } catch (err) {
         console.error(err);
         res.status(500).json({error: 'Internal server error'});
     }
+}
+exports.uploadImage =  (req, res) => {
+    const upload = multer({
+        limits: { fileSize: 4000000 },
+        fileFilter: fileFilter,
+    }).single("image");
+    upload(req, res, async (err) => {
+        if (err) {
+            if (err.code === "LIMIT_FILE_SIZE") {
+                return res.status(422).json({
+                    error: "حجم عکس ارسالی نباید بیشتر از 4 مگابایت باشد",
+                });
+            }
+            res.status(400).json({ error: err });
+        } else {
+            if (req.file) {
+
+                const fileName = `${shortId.generate()}_${
+                    req.file.originalname
+                }`;
+                await sharp(req.file.buffer)
+                    .jpeg({
+                        quality: 60,
+                    })
+                    .toFile(`./public/upload/images/${fileName}`)
+                    .catch((err) => console.log(err));
+                res.status(200).json({
+                    image: `http://localhost:3000/uploads/${fileName}`,
+                });
+            } else {
+                res.status(400).json({
+                    error: "جهت آپلود باید عکسی انتخاب کنید",
+                });
+            }
+        }
+    });
+
 }
