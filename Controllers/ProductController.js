@@ -21,11 +21,11 @@ exports.list = async (req, res) => {
   try {
     const options = {
       page, limit,
+      sort: { _id: -1 }  
   };
     const products = await Product.paginate({}, options);
-    console.log(products);
     const productsCollection = transformData(products.docs, page, limit);
-    res.status(200).json(products);
+    res.status(200).json(productsCollection);
   } catch (err) {
     console.log(err);
     res.status(500).json( {error: err});

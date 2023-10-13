@@ -1,16 +1,12 @@
 const express = require("express");
-const path = require("path");
-const connectDB = require("./Configs/database");
 const app = express();
-app.use(express.json());
 const dotEnv = require("dotenv");
-
+const connectDB = require("./Configs/database");
+app.use(express.json());
 //* Load Config
-dotEnv.config({path: "./configs/config.env"});
-connectDB();
-
-
+dotEnv.config({path: "./Configs/config.env"});
 app.use(require("./Routes/Api"));
+connectDB();
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(
