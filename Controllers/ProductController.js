@@ -2,18 +2,29 @@ const Product = require("../Models/Product");
 const {transformData} = require("../utils/ProductTransformData");
 const {ObjectId} = require('mongoose').Types;
 const multer = require("multer");
-const { fileFilter } = require("../utils/upload");
+const {fileFilter} = require("../utils/upload");
 const path = require("path");
 const appRoot = require("app-root-path");
 const sharp = require("sharp");
+const fs = require('fs');
 const shortId = require("shortid");
+const productValidation = require('../Models/Validation/productValidation');
+
 exports.home = (req, res) => {
     res.status(200).json({toplearn: "Hello blog m"});
 };
-
 exports.store = async (req, res) => {
     try {
-        const {name, price, quantity, image} = req.body;
+        const filePath = `./public/upload/images/${req.body.image}`;
+        if (!fs.existsSync(filePath)) {
+            return  res.status(400).json({ message: 'عکس مورد نظر یافت نشد'});
+        }
+        const {error, value} = productValidation.productSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({message: error.details[0].message});
+        }
+
+        const {name, price, quantity, image} = value;
         const product = await Product.create({name, price, quantity, image});
         res.status(201).json(product);
     } catch (error) {
@@ -90,9 +101,9 @@ exports.delete = async (req, res) => {
         res.status(500).json({error: 'Internal server error'});
     }
 }
-exports.uploadImage =  (req, res) => {
+exports.uploadImage = (req, res) => {
     const upload = multer({
-        limits: { fileSize: 4000000 },
+        limits: {fileSize: 4000000},
         fileFilter: fileFilter,
     }).single("image");
     upload(req, res, async (err) => {
@@ -102,7 +113,7 @@ exports.uploadImage =  (req, res) => {
                     error: "حجم عکس ارسالی نباید بیشتر از 4 مگابایت باشد",
                 });
             }
-            res.status(400).json({ error: err });
+            res.status(400).json({error: err});
         } else {
             if (req.file) {
 
