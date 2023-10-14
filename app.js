@@ -5,7 +5,7 @@ const connectDB = require("./Configs/database");
 app.use(express.json());
 //* Load Config
 dotEnv.config({path: "./Configs/config.env"});
-app.use(require("./Routes/Api"));
+app.use("/api/v1/products",require("./Routes/Api"));
 connectDB();
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
