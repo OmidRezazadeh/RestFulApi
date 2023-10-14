@@ -94,7 +94,16 @@ exports.delete = async (req, res) => {
         }
         const product = await Product.findById(productId);
         if (!product) return res.status(404).json({error: 'Product not found'});
+
+        const filePath = `${appRoot}/public/upload/images/${product.image}`;
+        if (!fs.existsSync(filePath)) {
+            return  res.status(400).json({ message: 'عکس مورد نظر یافت نشد'});
+        }
+
+       fs.unlinkSync(filePath);
+
         await Product.findByIdAndDelete(productId);
+
         res.status(200).json({"message": "product has been successfully removed"})
     } catch (err) {
         console.error(err);
