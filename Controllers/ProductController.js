@@ -31,7 +31,6 @@ exports.store = async (req, res) => {
         res.status(500).json({error: "Product creation failed"});
     }
 };
-
 exports.list = async (req, res) => {
     const page = req.query.page || 1;
     const limit = 2;
@@ -48,7 +47,6 @@ exports.list = async (req, res) => {
         res.status(500).json({error: err});
     }
 };
-
 exports.single = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -69,12 +67,41 @@ exports.edit = async (req, res) => {
     try {
         const productId = req.params.id;
         if (!ObjectId.isValid(productId)) {
-            return res.status(400).json({error: 'Invalid product ID'});
+            return res.status(400).json({message: 'Invalid product ID'});
         }
         const product = await Product.findById(productId);
-        if (!product) return res.status(404).json({error: 'Product not found'});
+        if (!product) return res.status(404).json({message: 'Product not found'});
 
-        const {name, price, quantity, image} = req.body;
+
+        const {error, value} = productValidation.productSchema.validate(req.body);
+        if (error) {
+            return res.status(400).json({message: error.details[0].message});
+        }
+
+        const filePath = `./public/upload/images/${req.body.image}`;
+
+        const fileExtension = path.extname(filePath).toLowerCase();
+        const mimeTypeArray=[".jpeg",".png"]
+        if(!mimeTypeArray.includes(fileExtension)){
+            return res.status(400).json({message: 'پسوند عکس معتبر نیست '});
+        }
+
+        if (!fs.existsSync(filePath)) {
+            return  res.status(400).json({ message: 'عکس مورد نظر یافت نشد'});
+        }
+
+        if (req.body.image !== product.image ){
+            const filePath = `${appRoot}/public/upload/images/${product.image}`;
+            fs.unlinkSync(filePath);
+        }
+
+
+
+
+
+
+
+        const {name, price, quantity, image} = value;
         product.name = name;
         product.price = price;
         product.quantity = quantity

@@ -15,7 +15,7 @@ exports.productSchema= Joi.object({
     image: Joi.string().required()
         .messages({
             'string.base': 'لطفا یک رشته معتبر برای تصویر وارد کنید',
-            'any.required':'لطفا را وارد کنید',
+            'any.required':'لطفا   تصویر را وارد کنید',
         }),
     quantity:Joi.number().required().messages({
         'number.base': 'لطفا یک عدد معتبر برای  تعداد وارد کنید',
