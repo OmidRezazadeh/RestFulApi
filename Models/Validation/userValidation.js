@@ -1,6 +1,6 @@
 const Joi = require("joi");
 exports.schema =Joi.object({
-    fullname:Joi.string().required().min(4).max(255).alphanum()
+    name:Joi.string().required().min(4).max(255).alphanum()
         .messages({
             'any.required': 'Full name is required',
             'string.min': 'Full name must be at least 4 characters',
