@@ -2,29 +2,29 @@ const Joi = require("joi");
 exports.schema =Joi.object({
     name:Joi.string().required().min(4).max(255).alphanum()
         .messages({
-            'any.required': 'Full name is required',
-            'string.min': 'Full name must be at least 4 characters',
-            'string.max': 'Full name cannot exceed 255 characters',
+            'any.required': 'نام کامل اجباری است',
+            'string.min': 'نام کامل باید حداقل ۴ کاراکتر باشد',
+            'string.max': 'نام کامل نمی‌تواند بیشتر از ۲۵۵ کاراکتر باشد',
         }),
     email: Joi.string()
         .email()
         .required()
         .messages({
-            'string.base': 'Email must be a string',
-            'string.email': 'Email must be a valid email address',
-            'any.required': 'Email is required',
+            'string.base': 'ایمیل باید یک رشته باشد',
+            'string.email': 'ایمیل باید یک آدرس ایمیل معتبر باشد',
+            'any.required': 'ایمیل اجباری است',
         }),
     password:Joi.string().min(4).max(255).required()
         .messages({
-            'string.min': 'Password must be at least 4 characters',
-            'string.max': 'Password cannot exceed 255 characters',
-            'any.required': 'Password is required'
+            'string.min': 'رمز عبور باید حداقل ۴ کاراکتر باشد',
+            'string.max': 'رمز عبور نمی‌تواند بیشتر از ۲۵۵ کاراکتر باشد',
+            'any.required': 'رمز عبور اجباری است',
         }),
 
     confirmPassword: Joi.string().valid(Joi.ref('password')).required().label('Confirm password')
         .messages({
-            'any.only': 'Confirm password must match password',
-            'any.required': 'Confirm password is required'
+            'any.only': 'تأیید رمز عبور باید با رمز عبور مطابقت داشته باشد',
+            'any.required': 'تأیید رمز عبور اجباری است',
         })
 
 });
