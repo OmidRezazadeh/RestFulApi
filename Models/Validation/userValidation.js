@@ -1,5 +1,5 @@
 const Joi = require("joi");
-exports.schema =Joi.object({
+exports.userSchema =Joi.object({
     name:Joi.string().required().min(4).max(255).alphanum()
         .messages({
             'any.required': 'نام کامل اجباری است',

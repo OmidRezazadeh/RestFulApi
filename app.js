@@ -1,11 +1,13 @@
 const express = require("express");
 const app = express();
-const dotEnv = require("dotenv");
 const connectDB = require("./Configs/database");
+const dotEnv = require("dotenv");
+
 app.use(express.json());
 //* Load Config
 dotEnv.config({path: "./Configs/config.env"});
 app.use("/api/v1/products",require("./Routes/Api"));
+app.use("/api/v1/users",require("./Routes/Auth"));
 connectDB();
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
