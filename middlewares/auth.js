@@ -10,11 +10,9 @@ exports.authenticated = (req, res, next) => {
 
         const token = authHeader.split(" ")[1];
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-console.log(decodedToken.user);
+
         if (!decodedToken) {
-            const error = new Error("شما مجوز کافی ندارید");
-            error.statusCode = 401;
-            throw error;
+            return res.status(400).json({ message: "مجوز کافی ندارید" });
         }
 
         req.userId = decodedToken.user.userId;
