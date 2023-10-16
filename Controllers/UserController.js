@@ -67,4 +67,6 @@ exports.logout =async (req,res)=>{
 
 }
 
-
+exports.test= (req,res)=>{
+    res.status(200).json({message:"tesrt "})
+}
