@@ -63,8 +63,16 @@ exports.login = async (req, res) => {
         res.status(500).json({ error: "خطای سرور" });
     }
 }
-exports.logout =async (req,res)=>{
 
+exports.logout = (req,res)=>{
+    const authHeader = req.get('Authorization');
+    const token = authHeader.split(' ')[1];
+
+
+    const invalidTokens = [];
+    invalidTokens.push(token);
+
+    res.status(200).json({ message: 'شما با موفقیت خارج شده‌اید' });
 }
 
 exports.test= (req,res)=>{
