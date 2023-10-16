@@ -21,6 +21,10 @@ const productSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  deletedAt: {
+    type: Boolean,
+    default: false
+  },
 });
 productSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model("Product", productSchema);

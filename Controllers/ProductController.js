@@ -39,7 +39,7 @@ exports.list = async (req, res) => {
         const options = {
             page, limit, sort: {_id: -1},
         };
-        const products = await Product.paginate({}, options);
+        const products = await Product.paginate({ deletedAt: false }, options);
         const productsCollection = transformData(products.docs, page, limit);
         res.status(200).json(productsCollection);
     } catch (err) {
@@ -129,8 +129,9 @@ exports.delete = async (req, res) => {
 
        fs.unlinkSync(filePath);
 
-        await Product.findByIdAndDelete(productId);
-
+        // await Product.findByIdAndDelete(productId);
+        product.deletedAt = true;
+        await product.save();
         res.status(200).json({"message": "product has been successfully removed"})
     } catch (err) {
         console.error(err);
