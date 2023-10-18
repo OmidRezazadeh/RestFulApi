@@ -39,7 +39,27 @@ exports.list = async (req, res) => {
         const options = {
             page, limit, sort: {_id: -1},
         };
-        const products = await Product.paginate({ deletedAt: false }, options);
+
+
+        const searchQuery = {};
+
+        // Check if "quantity" is provided in the request query
+        if (req.body.quantity) {
+            searchQuery.quantity = req.body.quantity;
+        }
+
+        // Check if "price" is provided in the request query
+        if (req.body.price) {
+            searchQuery.price = req.body.price;
+        }
+
+
+        // Check if "createdAt" is provided in the request query
+        if (req.body.name) {
+            searchQuery.name = req.body.name;
+        }
+
+        const products = await Product.paginate( searchQuery, options);
         const productsCollection = transformData(products.docs, page, limit);
         res.status(200).json(productsCollection);
     } catch (err) {
