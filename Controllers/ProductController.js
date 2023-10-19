@@ -17,7 +17,7 @@ exports.store = async (req, res) => {
     try {
         const filePath = `./public/upload/images/${req.body.image}`;
         if (!fs.existsSync(filePath)) {
-            return  res.status(400).json({ message: 'عکس مورد نظر یافت نشد'});
+            return res.status(400).json({message: 'عکس مورد نظر یافت نشد'});
         }
         const {error, value} = productValidation.productSchema.validate(req.body);
         if (error) {
@@ -25,9 +25,10 @@ exports.store = async (req, res) => {
         }
 
         const {name, price, quantity, image} = value;
-        const product = await Product.create({name, price, quantity, image});
+        const product = await Product.create({name, price, quantity, image, user: req.userId});
         res.status(201).json(product);
     } catch (error) {
+        console.log(error);
         res.status(500).json({error: "Product creation failed"});
     }
 };
@@ -37,12 +38,10 @@ exports.list = async (req, res) => {
 
     try {
         const options = {
-            page, limit, sort: {_id: -1},
+            page, limit, sort: {_id: -1}, populate: 'user',
         };
 
-
         const searchQuery = {};
-
 
         if (req.body.quantity) {
             searchQuery.quantity = req.body.quantity;
@@ -54,12 +53,12 @@ exports.list = async (req, res) => {
         }
 
 
-
         if (req.body.name) {
             searchQuery.name = req.body.name;
         }
 
-        const products = await Product.paginate( searchQuery, options);
+        const products = await Product.paginate(searchQuery, options);
+
         const productsCollection = transformData(products.docs, page, limit);
         res.status(200).json(productsCollection);
     } catch (err) {
@@ -101,24 +100,19 @@ exports.edit = async (req, res) => {
         const filePath = `./public/upload/images/${req.body.image}`;
 
         const fileExtension = path.extname(filePath).toLowerCase();
-        const mimeTypeArray=[".jpeg",".png"]
-        if(!mimeTypeArray.includes(fileExtension)){
+        const mimeTypeArray = [".jpeg", ".png"]
+        if (!mimeTypeArray.includes(fileExtension)) {
             return res.status(400).json({message: 'پسوند عکس معتبر نیست '});
         }
 
         if (!fs.existsSync(filePath)) {
-            return  res.status(400).json({ message: 'عکس مورد نظر یافت نشد'});
+            return res.status(400).json({message: 'عکس مورد نظر یافت نشد'});
         }
 
-        if (req.body.image !== product.image ){
+        if (req.body.image !== product.image) {
             const filePath = `${appRoot}/public/upload/images/${product.image}`;
             fs.unlinkSync(filePath);
         }
-
-
-
-
-
 
 
         const {name, price, quantity, image} = value;
@@ -144,10 +138,10 @@ exports.delete = async (req, res) => {
 
         const filePath = `${appRoot}/public/upload/images/${product.image}`;
         if (!fs.existsSync(filePath)) {
-            return  res.status(400).json({ message: 'عکس مورد نظر یافت نشد'});
+            return res.status(400).json({message: 'عکس مورد نظر یافت نشد'});
         }
 
-       fs.unlinkSync(filePath);
+        fs.unlinkSync(filePath);
 
         // await Product.findByIdAndDelete(productId);
         product.deletedAt = true;
@@ -160,8 +154,7 @@ exports.delete = async (req, res) => {
 }
 exports.uploadImage = (req, res) => {
     const upload = multer({
-        limits: {fileSize: 4000000},
-        fileFilter: fileFilter,
+        limits: {fileSize: 4000000}, fileFilter: fileFilter,
     }).single("image");
     upload(req, res, async (err) => {
         if (err) {
@@ -174,9 +167,7 @@ exports.uploadImage = (req, res) => {
         } else {
             if (req.file) {
 
-                const fileName = `${shortId.generate()}_${
-                    req.file.originalname
-                }`;
+                const fileName = `${shortId.generate()}_${req.file.originalname}`;
                 await sharp(req.file.buffer)
                     .jpeg({
                         quality: 60,
