@@ -2,7 +2,7 @@ const Product = require("../Models/Product");
 const {transformData} = require("../utils/ProductTransformData");
 const {ObjectId} = require('mongoose').Types;
 const multer = require("multer");
-const {fileFilter} = require("../utils/upload");
+const {upload, fileFilter } = require("../utils/upload");
 const path = require("path");
 const appRoot = require("app-root-path");
 const sharp = require("sharp");
@@ -58,7 +58,6 @@ exports.list = async (req, res) => {
         }
 
         const products = await Product.paginate(searchQuery, options);
-
         const productsCollection = transformData(products.docs, page, limit);
         res.status(200).json(productsCollection);
     } catch (err) {
@@ -128,61 +127,66 @@ exports.edit = async (req, res) => {
     }
 };
 exports.delete = async (req, res) => {
+
     try {
         const productId = req.params.id;
         if (!ObjectId.isValid(productId)) {
-            return res.status(400).json({error: 'Invalid product ID'});
+            const error = new Error("شناسه محصول صحیح نیست");
+            error.statusCode = 400;
+            throw error;   
         }
+
         const product = await Product.findById(productId);
-        if (!product) return res.status(404).json({error: 'Product not found'});
+        if (!product){
+            const error = new Error("محصولی با این شناسه یافت نشد");
+            error.statusCode = 404;
+            throw error;   
+            
+        }
 
         const filePath = `${appRoot}/public/upload/images/${product.image}`;
         if (!fs.existsSync(filePath)) {
-            return res.status(400).json({message: 'عکس مورد نظر یافت نشد'});
+            const error = new Error("فایلی یافت نشد");
+            error.statusCode = 400;
+            throw error;   
         }
 
         fs.unlinkSync(filePath);
-
-        // await Product.findByIdAndDelete(productId);
         product.deletedAt = true;
         await product.save();
         res.status(200).json({"message": "product has been successfully removed"})
     } catch (err) {
         console.error(err);
-        res.status(500).json({error: 'Internal server error'});
+        res.status(500).json({error: 'مشکلی پیش امده'});
     }
 }
-exports.uploadImage = (req, res) => {
-    const upload = multer({
-        limits: {fileSize: 4000000}, fileFilter: fileFilter,
-    }).single("image");
+exports.uploadImage = async (req, res) => {
+
     upload(req, res, async (err) => {
         if (err) {
-            if (err.code === "LIMIT_FILE_SIZE") {
-                return res.status(422).json({
-                    error: "حجم عکس ارسالی نباید بیشتر از 4 مگابایت باشد",
-                });
-            }
-            res.status(400).json({error: err});
+          // Handle any errors
+          if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(422).json({
+              error: 'حجم عکس ارسالی نباید بیشتر از 4 مگابایت باشد',
+            });
+          }
+          res.status(400).json({ error: err });
         } else {
-            if (req.file) {
-
-                const fileName = `${shortId.generate()}_${req.file.originalname}`;
-                await sharp(req.file.buffer)
-                    .jpeg({
-                        quality: 60,
-                    })
-                    .toFile(`./public/upload/images/${fileName}`)
-                    .catch((err) => console.log(err));
-                res.status(200).json({
-                    image: `http://localhost:3000/uploads/${fileName}`,
-                });
-            } else {
-                res.status(400).json({
-                    error: "جهت آپلود باید عکسی انتخاب کنید",
-                });
-            }
+          // Handle successful upload
+          if (!req.file) {
+            return res.status(400).json({ error: 'جهت آپلود باید عکسی انتخاب کنید' });
+          }
+    
+          const fileName = `${shortId.generate()}_${req.file.originalname}`;
+          await sharp(req.file.buffer)
+            .jpeg({ quality: 60 })
+            .toFile(`./public/upload/images/${fileName}`);
+    
+          res.status(200).json({
+            image: `http://localhost:3000/uploads/${fileName}`,
+          });
         }
-    });
-
-}
+      });
+    }
+    
+  

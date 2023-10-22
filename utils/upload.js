@@ -1,26 +1,21 @@
-// const multer = require("multer");
-// const uuid = require("uuid").v4;
-// exports.storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, "./public/uploads/images");
-//     },
-//
-//     filename: (req, file, cb) => {
-//         cb(null, `${uuid()}_${file.originalname}`);
-//     },
-// });
-//
-// exports.fileFilter = (req, file, cb) => {
-//     if (file.mimetype === "image/png") {
-//         cb(null, true);
-//     } else {
-//         cb("تنها پسوند JPEG پشتیبانی میشود", false);
-//     }
-// };
-exports.fileFilter = (req, file, cb) => {
-    if (file.mimetype == "image/png") {
+const multer = require('multer');
+const allowedMimeTypes = ['image/jpeg', 'image/png'];
+
+const fileFilter = (req, file, cb) => {
+
+  const fileMimType= file.mimetype;
+    if(allowedMimeTypes.includes(fileMimType)){
         cb(null, true);
     } else {
-        cb("تنها پسوند JPEG پشتیبانی میشود", false);
+        cb("پسوند فایل صحیح نیست", false);
     }
 };
+ 
+ 
+// Multer configuration
+const upload = multer({
+    limits: { fileSize: 4000000 },
+    fileFilter: fileFilter,
+  }).single('image');
+
+  module.exports = { upload, fileFilter };
