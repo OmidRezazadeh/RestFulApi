@@ -9,5 +9,6 @@ router.get("/:id",ProductController.single);
 router.put("/:id", ProductController.edit);
 router.delete("/:id",ProductController.delete);
 router.post("/upload",ProductController.uploadImage)
+router.get("/find-user/:id",ProductController.findUser);
 module.exports = router;
  

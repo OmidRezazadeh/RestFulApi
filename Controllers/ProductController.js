@@ -13,18 +13,18 @@ const productValidation = require("../Models/Validation/productValidation");
 exports.home = (req, res) => {
   res.status(200).json({ toplearn: "Hello blog m" });
 };
-exports.store = async (req, res,next) => {
+exports.store = async (req, res, next) => {
   try {
     const filePath = `./public/upload/images/${req.body.image}`;
     if (!fs.existsSync(filePath)) {
       const error = new Error("عکس مورد نظرذ یافت نشد");
-      error.status=404;
+      error.status = 404;
       throw error;
     }
     const { error, value } = productValidation.productSchema.validate(req.body);
     if (error) {
-      const errors =new Error(error.details[0].message )
-      errors.statusCode= 400;
+      const errors = new Error(error.details[0].message);
+      errors.statusCode = 400;
       throw errors;
     }
 
@@ -77,20 +77,28 @@ exports.list = async (req, res) => {
     res.status(500).json({ error: err });
   }
 };
-exports.single = async (req, res,next) => {
+
+exports.findUser =async (req, res) => {
+  const userId = req.params.id;
+  const products = await Product.findByUserIdMethod(userId);
+  res.status(200).json(products);
+
+};
+
+exports.single = async (req, res, next) => {
   try {
     const productId = req.params.id;
     if (!ObjectId.isValid(productId)) {
       const error = new Error("شناسه وارد شده صحیح  نیست");
-      error.status=400;
+      error.status = 400;
       throw error;
     }
     const product = await Product.findById(productId);
-    if (!product){ 
-      const error =new Error("محصولی یافت نشد");
-      error.status=404;
+    if (!product) {
+      const error = new Error("محصولی یافت نشد");
+      error.status = 404;
       throw error;
-  }
+    }
     res.status(200).json(product);
   } catch (err) {
     next(err);
@@ -98,7 +106,7 @@ exports.single = async (req, res,next) => {
     res.status(500).json({ error: "خطای سرور" });
   }
 };
-exports.edit = async (req, res,next) => {
+exports.edit = async (req, res, next) => {
   try {
     const productId = req.params.id;
     if (!ObjectId.isValid(productId)) {
@@ -107,32 +115,32 @@ exports.edit = async (req, res,next) => {
       throw error;
     }
     const product = await Product.findById(productId);
-    if (!product){
+    if (!product) {
       const error = new Error("محصولی یافت نشد");
       error.statusCode = 404;
       throw error;
-    } 
+    }
 
     const { error, value } = productValidation.productSchema.validate(req.body);
     if (error) {
-      const errors =new Error(error.details[0].message )
-      errors.statusCode= 400;
+      const errors = new Error(error.details[0].message);
+      errors.statusCode = 400;
       throw errors;
     }
- 
+
     const filePath = `./public/upload/images/${req.body.image}`;
     const fileExtension = path.extname(filePath).toLowerCase();
     const mimeTypeArray = [".jpeg", ".png"];
     if (!mimeTypeArray.includes(fileExtension)) {
-      const error =new Error("پسوند عکس معتبر نیست ")
-      error.statusCode= 400;
-      throw error
+      const error = new Error("پسوند عکس معتبر نیست ");
+      error.statusCode = 400;
+      throw error;
     }
 
     if (!fs.existsSync(filePath)) {
-      const error =new Error("عکس مورد نظر یافت نشد")
-      error.statusCode= 400;
-      throw error
+      const error = new Error("عکس مورد نظر یافت نشد");
+      error.statusCode = 400;
+      throw error;
     }
 
     if (req.body.image !== product.image) {
@@ -152,7 +160,7 @@ exports.edit = async (req, res,next) => {
     next(err);
   }
 };
-exports.delete = async (req, res,next) => {
+exports.delete = async (req, res, next) => {
   try {
     const productId = req.params.id;
     if (!ObjectId.isValid(productId)) {
@@ -160,20 +168,19 @@ exports.delete = async (req, res,next) => {
       error.statusCode = 400;
       throw error;
     }
-   
+
     const product = await Product.findById(productId);
     if (product.deletedAt === true) {
       const error = new Error("محصول حذف شده است");
-      error.statusCode = 404; 
+      error.statusCode = 404;
       throw error;
     }
-    
+
     if (!product) {
       const error = new Error("محصولی با این شناسه یافت نشد");
       error.statusCode = 404;
       throw error;
     }
-
 
     const filePath = `${appRoot}/public/upload/images/${product.image}`;
     if (!fs.existsSync(filePath)) {

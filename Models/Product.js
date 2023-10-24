@@ -30,6 +30,9 @@ const productSchema = mongoose.Schema({
         ref: 'User', // References the 'User' model
     },
 });
+productSchema.statics.findByUserIdMethod = function(userId) {
+    return this.find({user: userId });
+};
 productSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model("Product", productSchema);
  
